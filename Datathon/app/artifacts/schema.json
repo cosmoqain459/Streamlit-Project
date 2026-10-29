@@ -1,0 +1,16 @@
+{
+  "target": "Churned",
+  "numeric_features": [
+    "Recency",
+    "Frequency_log",
+    "Monetary_log",
+    "DistinctProducts_log",
+    "Tenure"
+  ],
+  "categorical_features": [
+    "CountryBucket"
+  ],
+  "probability_class": 1,
+  "model_type": "RandomForestClassifier",
+  "probability_meaning": "Probability of Customer Churn (1 = Churned, 0 = Retained)"
+}

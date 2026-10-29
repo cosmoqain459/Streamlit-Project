@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retail Intelligence | Enterprise Decision Platform</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              500: '#0f172a',
+              600: '#020617',
+              accent: '#2563eb'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- ApexCharts -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark ::-webkit-scrollbar-thumb { background: #334155; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; }
+    .badge-high { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .badge-med { background-color: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+    .badge-low { background-color: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
+    .badge-green { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-blue { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .dark .badge-high { background-color: rgba(239,68,68,0.2); color: #f87171; border-color: rgba(239,68,68,0.3); }
+    .dark .badge-med { background-color: rgba(245,158,11,0.2); color: #fbbf24; border-color: rgba(245,158,11,0.3); }
+    .dark .badge-low { background-color: rgba(148,163,184,0.2); color: #94a3b8; border-color: rgba(148,163,184,0.3); }
+    .dark .badge-green { background-color: rgba(34,197,94,0.2); color: #4ade80; border-color: rgba(34,197,94,0.3); }
+    .dark .badge-blue { background-color: rgba(59,130,246,0.2); color: #60a5fa; border-color: rgba(59,130,246,0.3); }
+  </style>
+</head>
+<body class="h-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased flex flex-col">
+
+  <!-- Top Global SaaS Header -->
+  <header class="h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 flex items-center justify-between z-30 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 flex items-center justify-center font-bold text-sm shadow-sm">
+        ◈
+      </div>
+      <div>
+        <div class="font-bold text-sm tracking-tight flex items-center gap-2">
+          Retail Intelligence
+          <span class="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">Enterprise Decision Platform</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Header Badges & Actions -->
+    <div class="flex items-center gap-3">
+      <div id="header-mode-badge" class="badge badge-green">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="header-mode-text">● Prediction Mode</span>
+      </div>
+
+      <div class="text-xs text-slate-500 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 pl-3">
+        Cohort: <span id="header-session-count" class="font-semibold text-slate-800 dark:text-slate-200">100</span> sessions
+      </div>
+
+      <button id="btn-open-settings" class="px-2.5 py-1.5 text-xs font-medium rounded-md border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-1.5 transition">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-600"></i>
+        <span>AI API Key</span>
+      </button>
+
+      <button id="btn-toggle-theme" class="p-1.5 rounded-md border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition" title="Toggle Dark/Light">
+        <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+        <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Application Shell (Sidebar + Main View) -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- Left Navigation Sidebar -->
+    <aside class="w-60 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col shrink-0">
+      
+      <!-- Nav Menu -->
+      <div class="flex-1 px-3 py-4 space-y-4 overflow-y-auto text-xs font-medium">
+        <div>
+          <div class="px-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Overview</div>
+          <button data-view="dashboard" class="nav-btn active w-full flex items-center gap-2.5 px-3 py-2 rounded-md transition text-left text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 font-semibold border-l-2 border-slate-900 dark:border-white">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Dashboard</span>
+          </button>
+        </div>
+
+        <div>
+          <div class="px-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Intelligence</div>
+          <div class="space-y-0.5">
+            <button data-view="predictions" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-md transition text-left text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900">
+              <i data-lucide="search" class="w-4 h-4"></i>
+              <span>Predictions</span>
+            </button>
+            <button data-view="behavior" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-md transition text-left text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900">
+              <i data-lucide="line-chart" class="w-4 h-4"></i>
+              <span>Behavior Analytics</span>
+            </button>
+            <button data-view="evaluation" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-md transition text-left text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900">
+              <i data-lucide="target" class="w-4 h-4"></i>
+              <span>Evaluation</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="px-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Model</div>
+          <button data-view="governance" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-md transition text-left text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span>Model Governance</span>
+          </button>
+        </div>
+
+        <div>
+          <div class="px-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">AI Assistant</div>
+          <button data-view="copilot" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-md transition text-left text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900">
+            <i data-lucide="sparkles" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+            <span>Executive Copilot</span>
+          </button>
+        </div>
+
+        <!-- Dataset Intake Component -->
+        <div class="pt-2 border-t border-slate-200 dark:border-slate-800">
+          <div class="px-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Active Cohort</div>
+          <div class="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 text-xs">
+            <div class="font-semibold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+              <span id="sidebar-dataset-name">Online Shoppers</span>
+              <span id="sidebar-dataset-mode-pill" class="badge badge-green text-[10px]">Mode A</span>
+            </div>
+            <div id="sidebar-dataset-count" class="text-[11px] text-slate-500 mt-1">100 sessions loaded</div>
+            <div class="mt-2.5 flex flex-col gap-1.5">
+              <button id="btn-load-prediction-sample" class="w-full text-center py-1 rounded bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 text-[11px] font-medium transition">
+                Load Mode A (Prediction)
+              </button>
+              <button id="btn-load-evaluation-sample" class="w-full text-center py-1 rounded bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 text-[11px] font-medium transition">
+                Load Mode B (Evaluation)
+              </button>
+              <label class="w-full text-center py-1 rounded bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-[11px] font-medium cursor-pointer hover:opacity-90 transition block">
+                <span>Upload Custom CSV</span>
+                <input type="file" id="csv-file-input" accept=".csv" class="hidden">
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar Footer Status -->
+      <div class="p-3 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 space-y-1">
+        <div class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span>Model Ready</span>
+        </div>
+        <div>Random Forest • ROC 0.793</div>
+        <div class="text-[10px] text-slate-400">Strict Deterministic Guardrails</div>
+      </div>
+    </aside>
+
+    <!-- Main Dynamic Content Canvas -->
+    <main class="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
+
+      <!-- VIEW 1: DASHBOARD -->
+      <section id="view-dashboard" class="view-panel space-y-6">
+        <!-- Page Title -->
+        <div class="flex items-start justify-between">
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Executive Intelligence Dashboard</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Monitor purchase intent, conversion behavior, and model performance.</p>
+          </div>
+          <button id="btn-export-csv" class="px-3 py-1.5 text-xs font-medium rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-1.5 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Export Scored CSV</span>
+          </button>
+        </div>
+
+        <!-- 4 High-Density KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-t-4 border-t-red-500 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">High Intent</div>
+            <div id="kpi-high-val" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5">22</div>
+            <div id="kpi-high-sub" class="text-xs text-slate-500 mt-1">22.0% of cohort (Score ≥ 0.73)</div>
+          </div>
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-t-4 border-t-blue-500 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Avg Probability</div>
+            <div id="kpi-avg-val" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5">18.5%</div>
+            <div class="text-xs text-slate-500 mt-1">Mean model score across cohort</div>
+          </div>
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-t-4 border-t-amber-500 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Medium Intent</div>
+            <div id="kpi-med-val" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5">33</div>
+            <div id="kpi-med-sub" class="text-xs text-slate-500 mt-1">33.0% of cohort (Score ≥ 0.52)</div>
+          </div>
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-t-4 border-t-slate-400 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Low Intent</div>
+            <div id="kpi-low-val" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5">45</div>
+            <div id="kpi-low-sub" class="text-xs text-slate-500 mt-1">45.0% of cohort</div>
+          </div>
+        </div>
+
+        <!-- Primary Insight Card -->
+        <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 border-l-blue-600 shadow-sm flex items-center justify-between">
+          <div class="pr-4">
+            <div class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Key Behavioral Insight</div>
+            <div id="insight-text-body" class="text-sm text-slate-800 dark:text-slate-200 font-medium mt-0.5">
+              Shoppers in the High-Intent tier exhibit an average inactivity lapse of <strong>45 days</strong> compared to extended inactivity among lower tiers. Recency and lifetime spend drive over 50% of model discrimination.
+            </div>
+          </div>
+          <button data-view="predictions" class="shrink-0 px-3.5 py-1.5 rounded-md bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-medium hover:opacity-90 transition">
+            Explore Predictions →
+          </button>
+        </div>
+
+        <!-- 2x2 Core Analytics Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="font-semibold text-sm text-slate-900 dark:text-white">Conversion Probability</div>
+            <div class="text-xs text-slate-500 mb-3">Distribution of model scores across active sessions</div>
+            <div id="chart-hist" class="h-64"></div>
+          </div>
+          <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="font-semibold text-sm text-slate-900 dark:text-white">Session Intent Distribution</div>
+            <div class="text-xs text-slate-500 mb-3">How sessions are distributed across model-score tiers</div>
+            <div id="chart-donut" class="h-64"></div>
+          </div>
+          <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="font-semibold text-sm text-slate-900 dark:text-white">Conversion Likelihood by Market</div>
+            <div class="text-xs text-slate-500 mb-3">Average model score across top geographic markets</div>
+            <div id="chart-market" class="h-64"></div>
+          </div>
+          <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="font-semibold text-sm text-slate-900 dark:text-white">Catalog Exploration vs Likelihood</div>
+            <div class="text-xs text-slate-500 mb-3">Relationship between distinct products viewed and model score</div>
+            <div id="chart-scatter" class="h-64"></div>
+          </div>
+        </div>
+
+        <!-- Commercial Segments Action Matrix -->
+        <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div class="font-semibold text-sm text-slate-900 dark:text-white">Commercial Micro-Segments & Action Matrix</div>
+          <div class="text-xs text-slate-500 mb-3">Actionable customer clusters based on RFM behavioral profiles</div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase font-semibold">
+                <tr>
+                  <th class="py-2.5 px-3">Segment</th>
+                  <th class="py-2.5 px-3">Sessions</th>
+                  <th class="py-2.5 px-3">Cohort Share</th>
+                  <th class="py-2.5 px-3">Prescribed Commercial Protocol</th>
+                </tr>
+              </thead>
+              <tbody id="table-segments-body" class="divide-y divide-slate-100 dark:divide-slate-800">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Top High-Opportunity Sessions Table -->
+        <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <div class="font-semibold text-sm text-slate-900 dark:text-white">Top High-Opportunity Sessions</div>
+              <div class="text-xs text-slate-500">Sessions exhibiting highest purchase conversion likelihood</div>
+            </div>
+            <button data-view="predictions" class="text-xs text-blue-600 dark:text-blue-400 font-medium hover:underline">
+              View All →
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase font-semibold">
+                <tr>
+                  <th class="py-2.5 px-3">Session</th>
+                  <th class="py-2.5 px-3">Likelihood</th>
+                  <th class="py-2.5 px-3">Intent Tier</th>
+                  <th class="py-2.5 px-3">Inactivity Lapse</th>
+                  <th class="py-2.5 px-3">Spend (log)</th>
+                  <th class="py-2.5 px-3">Market</th>
+                </tr>
+              </thead>
+              <tbody id="table-top-sessions-body" class="divide-y divide-slate-100 dark:divide-slate-800">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: PREDICTIONS WORKSPACE -->
+      <section id="view-predictions" class="view-panel hidden space-y-6">
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Predictions Workspace</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Explore session-level purchase intent and inspect individual customer signals.</p>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center gap-4 text-xs">
+          <div class="flex-1 min-w-[200px]">
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Search Market / Tier:</label>
+            <input type="text" id="pred-filter-search" placeholder="Search sessions..." class="w-full px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Intent Tier:</label>
+            <select id="pred-filter-tier" class="px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs">
+              <option value="All">All Tiers</option>
+              <option value="High Intent">High Intent</option>
+              <option value="Medium Intent">Medium Intent</option>
+              <option value="Low Intent">Low Intent</option>
+            </select>
+          </div>
+          <div class="w-44">
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Min Probability: <span id="pred-prob-label">0.0%</span></label>
+            <input type="range" id="pred-filter-prob" min="0" max="1" step="0.05" value="0" class="w-full">
+          </div>
+        </div>
+
+        <!-- Sessions Data Table -->
+        <div class="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div class="p-3 border-b border-slate-200 dark:border-slate-800 text-xs text-slate-500 flex justify-between items-center">
+            <span>Showing <strong id="pred-count-shown">100</strong> sessions</span>
+            <span class="text-[11px] text-slate-400">Click any session row to inspect top signals</span>
+          </div>
+          <div class="overflow-x-auto max-h-[460px]">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase font-semibold sticky top-0">
+                <tr>
+                  <th class="py-2.5 px-3">Session</th>
+                  <th class="py-2.5 px-3">Likelihood</th>
+                  <th class="py-2.5 px-3">Intent Tier</th>
+                  <th class="py-2.5 px-3">Inactivity (Recency)</th>
+                  <th class="py-2.5 px-3">Frequency (log)</th>
+                  <th class="py-2.5 px-3">Spend (log)</th>
+                  <th class="py-2.5 px-3">Products (log)</th>
+                  <th class="py-2.5 px-3">Market</th>
+                  <th class="py-2.5 px-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="table-predictions-body" class="divide-y divide-slate-100 dark:divide-slate-800">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: BEHAVIOR ANALYTICS -->
+      <section id="view-behavior" class="view-panel hidden space-y-6">
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Behavior Analytics</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Quantitative exploration of customer inactivity, spend depth, and catalog variety.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="font-semibold text-sm text-slate-900 dark:text-white">Inactivity Lapse (Recency) vs Likelihood</div>
+            <div class="text-xs text-slate-500 mb-3">Empirical polynomial fit: Probability drops sharply as inactivity exceeds 60 days</div>
+            <div id="chart-recency-trend" class="h-64"></div>
+          </div>
+          <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="font-semibold text-sm text-slate-900 dark:text-white">Lifetime Spend vs Catalog Diversity</div>
+            <div class="text-xs text-slate-500 mb-3">Bubble size represents individual session conversion likelihood</div>
+            <div id="chart-spend-bubble" class="h-64"></div>
+          </div>
+        </div>
+
+        <!-- Tier Behavioral Profiling Table -->
+        <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div class="font-semibold text-sm text-slate-900 dark:text-white">Aggregated Behavioral Metrics by Intent Tier</div>
+          <div class="text-xs text-slate-500 mb-3">Mean indicators across customer intent segments</div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase font-semibold">
+                <tr>
+                  <th class="py-2.5 px-3">Intent Tier</th>
+                  <th class="py-2.5 px-3">Avg Inactivity (Days)</th>
+                  <th class="py-2.5 px-3">Avg Order Frequency (log)</th>
+                  <th class="py-2.5 px-3">Avg Lifetime Spend (log)</th>
+                  <th class="py-2.5 px-3">Avg Products (log)</th>
+                  <th class="py-2.5 px-3">Avg Relationship Tenure (Days)</th>
+                </tr>
+              </thead>
+              <tbody id="table-behavior-profiles-body" class="divide-y divide-slate-100 dark:divide-slate-800">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: EVALUATION WORKSPACE -->
+      <section id="view-evaluation" class="view-panel hidden space-y-6">
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Ground-Truth Outcome Evaluation</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Model performance benchmarking against observed purchase revenue outcomes.</p>
+        </div>
+
+        <!-- Mode Notification Banner -->
+        <div id="eval-mode-banner" class="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 text-xs text-blue-900 dark:text-blue-200 flex items-center justify-between">
+          <div>
+            <strong>Evaluation Mode Active</strong>: Ground truth purchase outcomes detected in current dataset.
+          </div>
+          <button id="btn-eval-switch-sample" class="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 transition">
+            Reload Evaluation Batch
+          </button>
+        </div>
+
+        <!-- 4 Evaluation KPIs -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-t-4 border-t-emerald-500 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Classification Accuracy</div>
+            <div id="eval-kpi-acc" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5">93.0%</div>
+            <div id="eval-kpi-acc-sub" class="text-xs text-slate-500 mt-1">93 of 100 sessions correct</div>
+          </div>
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-t-4 border-t-blue-500 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Live F1-Score</div>
+            <div id="eval-kpi-f1" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5">0.632</div>
+            <div class="text-xs text-slate-500 mt-1">Precision: 54.5% | Recall: 75.0%</div>
+          </div>
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-t-4 border-t-slate-400 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Confirmed Buyers</div>
+            <div id="eval-kpi-conv" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5">8 / 11</div>
+            <div class="text-xs text-slate-500 mt-1">8.0% confirmed conversion rate</div>
+          </div>
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-t-4 border-t-purple-500 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Brier Calibration</div>
+            <div id="eval-kpi-brier" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5">0.0462</div>
+            <div class="text-xs text-slate-500 mt-1">Live ROC-AUC: 0.943</div>
+          </div>
+        </div>
+
+        <!-- Confusion Matrix & Benchmark Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="font-semibold text-sm text-slate-900 dark:text-white">Confusion Matrix (0.50 Decision Cutoff)</div>
+            <div class="text-xs text-slate-500 mb-4">Breakdown of model predictions vs observed buyer outcomes</div>
+            <div class="grid grid-cols-2 gap-3 text-center">
+              <div class="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                <div class="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-400">True Positives (TP)</div>
+                <div id="cm-tp" class="text-2xl font-bold text-emerald-800 dark:text-emerald-300 my-1">6</div>
+                <div class="text-[10px] text-emerald-600">Correctly captured buyers</div>
+              </div>
+              <div class="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                <div class="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400">False Alarms (FP)</div>
+                <div id="cm-fp" class="text-2xl font-bold text-amber-800 dark:text-amber-300 my-1">5</div>
+                <div class="text-[10px] text-amber-600">High intent, checkout drop-off</div>
+              </div>
+              <div class="p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800">
+                <div class="text-[10px] uppercase font-bold text-red-700 dark:text-red-400">Missed Conversions (FN)</div>
+                <div id="cm-fn" class="text-2xl font-bold text-red-800 dark:text-red-300 my-1">2</div>
+                <div class="text-[10px] text-red-600">Unexpected buyers</div>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
+                <div class="text-[10px] uppercase font-bold text-slate-700 dark:text-slate-400">True Negatives (TN)</div>
+                <div id="cm-tn" class="text-2xl font-bold text-slate-800 dark:text-slate-200 my-1">87</div>
+                <div class="text-[10px] text-slate-500">Avoided ad spend waste</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="font-semibold text-sm text-slate-900 dark:text-white">Live Cohort vs Holdout Benchmark</div>
+            <div class="text-xs text-slate-500 mb-3">Comparison against baseline test split</div>
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase font-semibold">
+                <tr>
+                  <th class="py-2 px-3">Metric</th>
+                  <th class="py-2 px-3">Live Cohort</th>
+                  <th class="py-2 px-3">Holdout Benchmark</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                <tr><td class="py-2 px-3 font-medium">ROC-AUC</td><td class="py-2 px-3 text-blue-600 font-bold">0.943</td><td class="py-2 px-3 text-slate-500">0.793</td></tr>
+                <tr><td class="py-2 px-3 font-medium">F1-Score</td><td class="py-2 px-3 text-blue-600 font-bold">0.632</td><td class="py-2 px-3 text-slate-500">0.704</td></tr>
+                <tr><td class="py-2 px-3 font-medium">Precision</td><td class="py-2 px-3 text-blue-600 font-bold">54.5%</td><td class="py-2 px-3 text-slate-500">67.4%</td></tr>
+                <tr><td class="py-2 px-3 font-medium">Recall</td><td class="py-2 px-3 text-blue-600 font-bold">75.0%</td><td class="py-2 px-3 text-slate-500">73.6%</td></tr>
+                <tr><td class="py-2 px-3 font-medium">Accuracy</td><td class="py-2 px-3 text-blue-600 font-bold">93.0%</td><td class="py-2 px-3 text-slate-500">70.5%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Decision Threshold Explorer -->
+        <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+          <div>
+            <div class="font-semibold text-sm text-slate-900 dark:text-white">Decision Threshold Explorer</div>
+            <div class="text-xs text-slate-500">Simulate trade-offs between precision and recall without altering production model weights.</div>
+          </div>
+          <div class="flex items-center gap-4 text-xs">
+            <span class="font-bold">Cutoff Threshold: <span id="thresh-slider-val" class="text-blue-600 font-extrabold text-sm">0.50</span></span>
+            <input type="range" id="thresh-slider" min="0.20" max="0.80" step="0.05" value="0.50" class="w-64">
+          </div>
+          <div id="chart-threshold-curve" class="h-64"></div>
+        </div>
+      </section>
+
+      <!-- VIEW 5: MODEL GOVERNANCE -->
+      <section id="view-governance" class="view-panel hidden space-y-6">
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Model Governance & Explainability</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Model architecture specifications, holdout performance, and feature importance contracts.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="text-[10px] font-bold text-slate-400 uppercase">ROC-AUC</div>
+            <div class="text-2xl font-bold mt-1 text-blue-600">0.793</div>
+            <div class="text-[10px] text-slate-500">Holdout discrimination</div>
+          </div>
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="text-[10px] font-bold text-slate-400 uppercase">F1-Score</div>
+            <div class="text-2xl font-bold mt-1 text-emerald-600">0.704</div>
+            <div class="text-[10px] text-slate-500">Balanced accuracy</div>
+          </div>
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="text-[10px] font-bold text-slate-400 uppercase">Precision</div>
+            <div class="text-2xl font-bold mt-1">67.4%</div>
+            <div class="text-[10px] text-slate-500">Buyer reliability</div>
+          </div>
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="text-[10px] font-bold text-slate-400 uppercase">Recall</div>
+            <div class="text-2xl font-bold mt-1">73.6%</div>
+            <div class="text-[10px] text-slate-500">Buyer coverage</div>
+          </div>
+          <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="text-[10px] font-bold text-slate-400 uppercase">Hit Rate</div>
+            <div class="text-2xl font-bold mt-1">70.5%</div>
+            <div class="text-[10px] text-slate-500">Overall accuracy</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="font-semibold text-sm text-slate-900 dark:text-white">Feature Importance (Business Aggregated)</div>
+            <div class="text-xs text-slate-500 mb-3">Relative historical contribution to conversion score</div>
+            <div id="chart-feature-imp" class="h-64"></div>
+          </div>
+          <div class="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-xs space-y-3">
+            <div class="font-semibold text-sm text-slate-900 dark:text-white">Production Governance & Contracts</div>
+            <div class="space-y-1.5 text-slate-600 dark:text-slate-300">
+              <div><strong>Model Family</strong>: Balanced Random Forest Classifier</div>
+              <div><strong>Target Variable</strong>: Revenue (Purchase Conversion)</div>
+              <div><strong>High-Intent Threshold</strong>: ≥ 0.7281 (80th percentile)</div>
+              <div><strong>Medium-Intent Threshold</strong>: ≥ 0.5164 (50th percentile)</div>
+              <div><strong>Invariance Guarantee</strong>: Fixed cutoffs remain constant across all live batches.</div>
+            </div>
+            <div class="p-3 rounded bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 text-blue-900 dark:text-blue-200">
+              💡 Feature importance reflects historical association and does not imply unilateral causality.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 6: CONVERSATIONAL AI COPILOT -->
+      <section id="view-copilot" class="view-panel hidden flex flex-col h-[calc(100vh-8rem)]">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
+          <div>
+            <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              <span>Executive AI Copilot</span>
+              <span class="badge badge-blue text-[10px]" id="copilot-active-provider-badge">Provider: Local Facts</span>
+            </h1>
+            <p class="text-xs text-slate-500">Grounded conversational intelligence backed by deterministic cohort evidence & real LLMs.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="copilot-provider-select" class="px-2.5 py-1 text-xs rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium">
+              <option value="auto">Auto (Smart Selection)</option>
+              <option value="gemini">Google Gemini 1.5 Flash</option>
+              <option value="deepseek">DeepSeek V3 (chat)</option>
+              <option value="local">Local Facts Synthesizer</option>
+            </select>
+            <button id="btn-clear-chat" class="px-2.5 py-1 text-xs rounded border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              Reset Chat
+            </button>
+          </div>
+        </div>
+
+        <!-- Suggested Inquiry Chips -->
+        <div class="py-2.5 flex items-center gap-2 overflow-x-auto shrink-0 text-xs">
+          <span class="text-[11px] font-bold text-slate-400">Suggested:</span>
+          <button class="chip-prompt px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 transition whitespace-nowrap">
+            📊 Cohort Conversion Health
+          </button>
+          <button class="chip-prompt px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 transition whitespace-nowrap">
+            🎯 Retention Strategy Protocol
+          </button>
+          <button class="chip-prompt px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 transition whitespace-nowrap">
+            🔍 Conversion Drivers Analysis
+          </button>
+          <button class="chip-prompt px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 transition whitespace-nowrap">
+            ⚠️ Missed Conversions Diagnostics
+          </button>
+        </div>
+
+        <!-- Chat Conversation Messages Stream -->
+        <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-xs">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Pinned Input Bar -->
+        <div class="pt-3 shrink-0">
+          <form id="chat-input-form" class="flex items-center gap-2">
+            <input type="text" id="chat-input-field" placeholder="Ask about conversion signals, customer segments, or evaluation metrics..." class="flex-1 px-4 py-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit" id="chat-send-btn" class="px-4 py-2.5 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-semibold hover:opacity-90 transition flex items-center gap-1.5">
+              <span>Send</span>
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            </button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Session Detail Slide-Over Drawer -->
+  <div id="drawer-session-inspector" class="fixed inset-y-0 right-0 w-96 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl p-6 transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto hidden">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+      <div class="font-bold text-sm text-slate-900 dark:text-white">Session Detail Inspector</div>
+      <button id="btn-close-drawer" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+    <div id="drawer-session-content" class="mt-4 space-y-4 text-xs">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- API Key Settings Modal -->
+  <div id="modal-settings" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-2xl space-y-4 text-xs">
+      <div class="flex items-center justify-between">
+        <div class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="key" class="w-4 h-4 text-blue-600"></i>
+          <span>LLM API Settings</span>
+        </div>
+        <button id="btn-close-modal" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p class="text-slate-500">Provide an API key to unlock reasoning with Google Gemini or DeepSeek. Keys are stored safely in your browser session.</p>
+      
+      <div class="space-y-3">
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Google Gemini API Key:</label>
+          <input type="password" id="input-gemini-key" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">DeepSeek API Key:</label>
+          <input type="password" id="input-deepseek-key" placeholder="sk-..." class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono">
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2">
+        <button id="btn-save-keys" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
+          Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "accuracy": 0.9,
+  "precision": 0.2222,
+  "recall": 0.2857,
+  "f1": 0.25,
+  "roc_auc": 0.744,
+  "high_intent_cutoff": 0.194,
+  "medium_intent_cutoff": 0.05,
+  "feature_importances": {
+    "Recency": 0.32214,
+    "Monetary_log": 0.19156,
+    "DistinctProducts_log": 0.18012,
+    "Tenure": 0.15384,
+    "Frequency_log": 0.11076,
+    "CountryBucket_United Kingdom": 0.02006,
+    "CountryBucket_Other": 0.00714,
+    "CountryBucket_Spain": 0.00655,
+    "CountryBucket_Germany": 0.00554,
+    "CountryBucket_France": 0.00228
+  }
+}
